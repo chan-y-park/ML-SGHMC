@@ -25,7 +25,7 @@ def load(digits, dataset = "training", path = "."):
         fname_img = os.path.join(path, 't10k-images-idx3-ubyte')
         fname_lbl = os.path.join(path, 't10k-labels-idx1-ubyte')
     else:
-        raise ValueError, "dataset must be 'testing' or 'training'"
+        raise ValueError("dataset must be 'testing' or 'training'")
 
     flbl = open(fname_lbl, 'rb')
     magic_nr, size = struct.unpack(">II", flbl.read(8))
@@ -37,12 +37,12 @@ def load(digits, dataset = "training", path = "."):
     img = pyarray("B", fimg.read())
     fimg.close()
 
-    ind = [ k for k in xrange(size) if lbl[k] in digits ]
+    ind = [ k for k in range(size) if lbl[k] in digits ]
     N = len(ind)
 
     images = zeros((N, rows, cols), dtype=uint8)
     labels = zeros((N, 1), dtype=int8)
-    for i in xrange(len(ind)):
+    for i in range(len(ind)):
         images[i] = array(img[ ind[i]*rows*cols : (ind[i]+1)*rows*cols ]).reshape((rows, cols))
         labels[i] = lbl[ind[i]]
 
@@ -65,7 +65,7 @@ def cfg_param():
 def run_exp( param ):
     np.random.seed( param.seed )
     net = nncfg.create_net( param )
-    print 'network configure end, start loading data ...'
+    print('network configure end, start loading data ...')
 
     # load in data 
     train_images, train_labels = load( range(10), 'training', param.path_data )
@@ -82,7 +82,7 @@ def run_exp( param ):
     ntrain = train_xdata.shape[0]    
     nvalid = 10000
     assert nvalid % param.batch_size == 0
-    nvalid = nvalid / param.batch_size
+    nvalid = nvalid // param.batch_size
     valid_xdata, valid_ylabel = train_xdata[0:nvalid], train_ylabel[0:nvalid]
     train_xdata, train_ylabel = train_xdata[nvalid:ntrain], train_ylabel[nvalid:ntrain]
     
@@ -94,13 +94,13 @@ def run_exp( param ):
     
     # set parameters
     param.num_train = train_ylabel.size
-    print 'loading end,%d train,%d valid,%d test, start update ...' % ( train_ylabel.size, valid_ylabel.size, test_ylabel.size )
+    print('loading end,%d train,%d valid,%d test, start update ...' % ( train_ylabel.size, valid_ylabel.size, test_ylabel.size ))
         
-    for it in xrange( param.num_round ):
+    for it in range( param.num_round ):
         param.set_round( it )
         net.update_all( train_xdata, train_ylabel )
         sys.stderr.write( '[%d]' % it )
         for ev in evals:
             ev.eval( it, sys.stderr )
         sys.stderr.write('\n')            
-    print 'all update end'
+    print('all update end')

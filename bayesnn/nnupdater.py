@@ -101,7 +101,7 @@ class HyperUpdater:
             u.wd = wd
 
         ss = ','.join( str(u.w.shape) for u in self.updaterlist )
-        print 'hyperupdate[%s]:plambda=%f,wd=%f' % ( ss, plambda, wd )
+        print ('hyperupdate[%s]:plambda=%f,wd=%f' % ( ss, plambda, wd ))
         sys.stdout.flush()
 
     def print_info( self ):

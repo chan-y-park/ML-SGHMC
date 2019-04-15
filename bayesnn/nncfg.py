@@ -20,7 +20,7 @@ class NNFactory:
         elif self.param.updater == 'nag':
             return nnupdater.NAGUpdater( w, g_w, self.param )
         else:
-            raise 'NNConfig', 'unknown updater'
+            raise RuntimeError('NNConfig', 'unknown updater')
 
     def create_hyperupdater( self, updaterlist ):
         if self.param.hyperupdater == 'none':
@@ -30,7 +30,7 @@ class NNFactory:
         elif self.param.hyperupdater == 'gibbs-sep':
             return [ nnupdater.HyperUpdater( self.param, [u] ) for u in updaterlist ]
         else:
-            raise 'NNConfig', 'unknown hyperupdater'
+            raise RuntimeError('NNConfig', 'unknown hyperupdater')
 
     def create_olabel( self ):
         param = self.param
@@ -48,7 +48,7 @@ class NNFactory:
         elif param.out_type == 'logistic':
             return nnet.RegressionLayer( o_node, o_label, param )
         else:
-            raise 'NNConfig', 'unknown out_type'
+            raise RuntimeError('NNConfig', 'unknown out_type')
         
 def softmax( param ):
     factory = NNFactory( param )
@@ -116,7 +116,7 @@ def create_net( param ):
     elif param.net_type == 'softmax':
         return softmax( param )
     else:
-        raise 'NNConfig', 'unknown net_type'
+        raise RuntimeError('NNConfig', 'unknown net_type')
 
 # create a batch data from existing training data
 # nbatch: batch size
@@ -124,17 +124,17 @@ def create_net( param ):
 # scale: scale the feature by scale
 def create_batch( images, labels, nbatch, doshuffle=False, scale=1.0 ):
     if labels.shape[0] % nbatch != 0:
-        print '%d data will be dropped during batching' % (labels.shape[0] % nbatch)
-    nsize = labels.shape[0] / nbatch * nbatch
+        print('%d data will be dropped during batching' % (labels.shape[0] % nbatch))
+    nsize = labels.shape[0] // nbatch * nbatch
     assert images.shape[0] == labels.shape[0]
 
     if doshuffle:
-        ind = range( images.shape[0] )
+        ind = list(range( images.shape[0] ))
         np.random.shuffle( ind )
         images, labels = images[ind], labels[ind]
 
-    images = images[ 0 : nsize ];
-    labels = labels[ 0 : nsize ];
-    xdata = np.float32( images.reshape( labels.shape[0]/nbatch, nbatch, images[0].size ) ) * scale
-    ylabel = labels.reshape( labels.shape[0]/nbatch, nbatch )    
+    images = images[ 0 : nsize ]
+    labels = labels[ 0 : nsize ]
+    xdata = np.float32( images.reshape( labels.shape[0]//nbatch, nbatch, images[0].size ) ) * scale
+    ylabel = labels.reshape( labels.shape[0]//nbatch, nbatch )    
     return xdata, ylabel

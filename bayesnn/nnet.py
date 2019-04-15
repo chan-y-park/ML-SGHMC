@@ -74,7 +74,7 @@ class ActiveLayer:
             self.o_node[:] = 1.0 / ( 1.0 + np.exp( - self.i_node ) )
             self.i_node[:] = self.o_node * (1.0 - self.o_node)
         else:
-            raise 'NNConfig', 'unknown node_type'
+            raise RuntimeError('NNConfig', 'unknown node_type')
         
     def backprop( self, passgrad = True ):
         if passgrad:
@@ -99,7 +99,7 @@ class SoftmaxLayer:
     def backprop( self, passgrad = True ):
         if passgrad:
             nbatch = self.i_node.shape[0]
-            for i in xrange( nbatch ):
+            for i in range( nbatch ):
                 self.i_node[ i, self.o_label[i] ] -= 1.0 
     def params( self ):
         return []
@@ -125,7 +125,7 @@ class RegressionLayer:
         self.base_score = (param.avg_label - param.min_label) / self.scale
         if self.n_type == 'logistic':
             self.base_score = - math.log( 1.0 / self.base_score - 1.0 );
-        print 'range=[%f,%f], base=%f' %( self.min_label, param.max_label, param.avg_label )
+        print('range=[%f,%f], base=%f' %( self.min_label, param.max_label, param.avg_label ))
     def forward( self, istrain = True ):     
         self.init_params()
         nbatch = self.i_node.shape[0]
@@ -167,24 +167,24 @@ class NNetwork:
 
     def update( self, xdata, ylabel ):
         self.i_node[:] = xdata
-        for i in xrange( len(self.layers) ):
+        for i in range( len(self.layers) ):
             self.layers[i].forward( True )
 
         self.o_label[:] = ylabel
-        for i in reversed( xrange( len(self.layers) ) ):
+        for i in reversed( range( len(self.layers) ) ):
             self.layers[i].backprop( i!= 0 )
         for u in self.updaters:
             u.update()
 
     def update_all( self, xdatas, ylabels ):
-        for i in xrange( xdatas.shape[0] ):            
+        for i in range( xdatas.shape[0] ):            
             self.update( xdatas[i], ylabels[i] )
         for u in self.updaters:
             u.print_info()
 
     def predict( self, xdata ):
         self.i_node[:] = xdata
-        for i in xrange( len(self.layers) ):
+        for i in range( len(self.layers) ):
             self.layers[i].forward( False )
         return self.o_node
 
@@ -218,11 +218,11 @@ class NNEvaluator:
         sum_bad  = 0.0
         sum_loglike = 0.0
        
-        for i in xrange( self.xdatas.shape[0] ):
+        for i in range( self.xdatas.shape[0] ):
             self.o_pred[i,:] += alpha * self.nnet.predict( self.xdatas[i] )
             y_pred = np.argmax( self.o_pred[i,:], 1 )            
             sum_bad += np.sum(  y_pred != self.ylabels[i,:] )
-            for j in xrange( self.xdatas.shape[1] ):
+            for j in range( self.xdatas.shape[1] ):
                 sum_loglike += np.log( self.o_pred[ i , j, self.ylabels[i,j] ] )
 
         ninst = self.ylabels.size
